@@ -1,0 +1,813 @@
+/* =========================================================
+   STYLE.CSS — INVITATION ROMANTIQUE INTERACTIVE
+   ---------------------------------------------------------
+   Ce fichier gère :
+   - les couleurs ;
+   - l'image de fond img/cover.jpg ;
+   - l'overlay de lisibilité ;
+   - la carte glassmorphism ;
+   - les boutons OUI / NON ;
+   - l'écran de confirmation ;
+   - les cœurs animés ;
+   - le responsive mobile ;
+   - l'accessibilité.
+   ========================================================= */
+
+
+/* =========================================================
+   1. RESET CSS ET RÈGLES GLOBALES
+   ---------------------------------------------------------
+   Le reset supprime les marges par défaut des navigateurs.
+   box-sizing: border-box garantit que padding et bordures
+   sont inclus dans les dimensions des éléments.
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+/* =========================================================
+   2. VARIABLES CSS — COULEURS ET PERSONNALISATION
+   ---------------------------------------------------------
+   Pour changer les couleurs principales, modifie uniquement
+   les variables ci-dessous.
+
+   Pour rendre l'image plus visible :
+   réduis l'opacité dans --background-overlay.
+   Exemple :
+   - 0.30 : image très visible ;
+   - 0.45 : bon équilibre ;
+   - 0.65 : texte très lisible, image plus sombre.
+   ========================================================= */
+
+:root {
+    /* Couleurs romantiques principales. */
+    --rose-principal: #d989a4;
+    --rose-clair: #f4bdd0;
+    --rose-fonce: #b55375;
+
+    /* Couleurs secondaires. */
+    --corail: #ee9a8d;
+    --violet-doux: #b99bd9;
+    --or-doux: #e5c36c;
+    --creme: #fff8f2;
+
+    /* Couleurs de texte. */
+    --texte-principal: #ffffff;
+    --texte-secondaire: rgba(255, 255, 255, 0.90);
+    --texte-discret: rgba(255, 255, 255, 0.70);
+
+    /*
+       Overlay au-dessus de img/cover.jpg.
+       Modifie 0.42 si tu veux rendre l'image plus claire
+       ou plus sombre.
+    */
+    --background-overlay: rgba(32, 14, 35, 0.42);
+
+    /* Couleur visible uniquement si l'image n'est pas chargée. */
+    --background-fallback: #251226;
+
+    /* Variables de la carte glassmorphism. */
+    --glass-background: rgba(255, 255, 255, 0.12);
+    --glass-border: rgba(255, 255, 255, 0.25);
+    --glass-shadow: rgba(0, 0, 0, 0.38);
+
+    /* Dégradé rose utilisé sur le bouton OUI. */
+    --gradient-yes: linear-gradient(
+        135deg,
+        #e49bb4 0%,
+        #c85d81 100%
+    );
+
+    /* Dégradé visible quand la souris passe sur OUI. */
+    --gradient-yes-hover: linear-gradient(
+        135deg,
+        #efb0c5 0%,
+        #b94870 100%
+    );
+
+    /* Dégradé doré du bouton Google Forms. */
+    --gradient-confirm: linear-gradient(
+        135deg,
+        #e0a45d 0%,
+        #c97959 100%
+    );
+
+    /* Dégradé doré visible au survol du bouton final. */
+    --gradient-confirm-hover: linear-gradient(
+        135deg,
+        #edbd76 0%,
+        #ba674e 100%
+    );
+
+    /* Polices Google Fonts chargées dans index.html. */
+    --font-title: "Playfair Display", Georgia, serif;
+    --font-text: "Poppins", Arial, sans-serif;
+
+    /* Arrondis et transitions réutilisables. */
+    --radius-card: 24px;
+    --radius-button: 999px;
+
+    --transition-fast: 180ms ease;
+    --transition-normal: 350ms ease;
+    --transition-slow: 650ms ease;
+}
+
+
+/* =========================================================
+   3. HTML ET BODY
+   ---------------------------------------------------------
+   L'image img/cover.jpg est utilisée comme fond plein écran.
+
+   background-size: cover :
+   l'image couvre entièrement l'écran, sans bandes vides.
+
+   Important : sur un écran dont le format est différent de
+   celui de la photo, CSS peut recadrer légèrement les bords.
+   C'est le comportement normal de "cover".
+   ========================================================= */
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+}
+
+html {
+    overflow: hidden;
+}
+
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    font-family: var(--font-text);
+    color: var(--texte-principal);
+
+    /*
+       L'image utilisée est : img/cover.jpg
+
+       Vérifie que ta structure est :
+       ├── index.html
+       ├── style.css
+       ├── script.js
+       └── img/
+           └── cover.jpg
+    */
+    background-image:
+        linear-gradient(
+            var(--background-overlay),
+            var(--background-overlay)
+        ),
+        url("img/cover.jpg");
+
+    /*
+       cover garantit que le fond remplit toute la fenêtre.
+       center center conserve le milieu de l'image visible.
+    */
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    background-color: var(--background-fallback);
+
+    /*
+       Empêche les barres de défilement accidentelles,
+       notamment lorsque le bouton NON se déplace.
+    */
+    overflow: hidden;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+
+/* =========================================================
+   4. CONTENEUR PRINCIPAL
+   ---------------------------------------------------------
+   Il couvre toute la fenêtre et sert de zone générale de la
+   page. overflow: hidden empêche les animations de cœurs
+   ou le bouton NON de créer un scroll.
+   ========================================================= */
+
+.invitation-container {
+    position: relative;
+
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   5. GESTION DES ÉCRANS
+   ---------------------------------------------------------
+   Les écrans accueil et confirmation se superposent.
+   La classe .active affiche un écran et cache l'autre.
+   ========================================================= */
+
+.screen {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    padding: 24px;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+        opacity var(--transition-slow),
+        visibility var(--transition-slow);
+}
+
+.screen.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+
+/* =========================================================
+   6. CARTE CENTRALE — GLASSMORPHISM
+   ---------------------------------------------------------
+   La carte semi-transparente améliore la lisibilité tout en
+   laissant l'image de fond visible avec un flou subtil.
+   ========================================================= */
+
+.invitation-card {
+    position: relative;
+    z-index: 3;
+
+    width: min(100%, 680px);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 58px 52px;
+    text-align: center;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.18),
+            rgba(255, 255, 255, 0.06)
+        ),
+        var(--glass-background);
+
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-card);
+
+    box-shadow:
+        0 22px 70px var(--glass-shadow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+/*
+   Halo léger placé derrière la carte.
+   Il apporte une touche chaleureuse sans effet agressif.
+*/
+.invitation-card::before {
+    content: "";
+
+    position: absolute;
+    inset: -2px;
+
+    z-index: -1;
+
+    border-radius: inherit;
+
+    background: linear-gradient(
+        135deg,
+        rgba(244, 189, 208, 0.42),
+        rgba(185, 155, 217, 0.14),
+        rgba(238, 154, 141, 0.28)
+    );
+
+    filter: blur(18px);
+    opacity: 0.45;
+}
+
+
+/* =========================================================
+   7. QUESTION PRINCIPALE
+   ---------------------------------------------------------
+   clamp() adapte automatiquement la taille du texte selon
+   la largeur disponible, sans besoin de plusieurs tailles fixes.
+   ========================================================= */
+
+.question-text {
+    max-width: 600px;
+
+    margin-bottom: 42px;
+
+    font-family: var(--font-title);
+    font-size: clamp(1.8rem, 4.4vw, 3rem);
+    font-weight: 500;
+    line-height: 1.35;
+
+    color: var(--texte-principal);
+
+    text-shadow: 0 3px 18px rgba(0, 0, 0, 0.38);
+}
+
+.question-text .highlight {
+    display: inline-block;
+
+    margin-top: 6px;
+
+    color: var(--rose-clair);
+    font-style: italic;
+    font-weight: 600;
+
+    text-shadow: 0 2px 14px rgba(217, 137, 164, 0.55);
+}
+
+
+/* =========================================================
+   8. CONTENEUR DES BOUTONS
+   ---------------------------------------------------------
+   Les boutons sont alignés horizontalement sur ordinateur.
+   Sur mobile, ils passent en colonne grâce à la media query.
+   ========================================================= */
+
+.buttons-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+
+    width: 100%;
+    min-height: 58px;
+}
+
+
+/* =========================================================
+   9. STYLE COMMUN DES BOUTONS
+   ---------------------------------------------------------
+   Les boutons sont suffisamment grands pour un usage tactile.
+   ========================================================= */
+
+.btn {
+    position: relative;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 130px;
+    min-height: 52px;
+    padding: 14px 32px;
+
+    border: 0;
+    border-radius: var(--radius-button);
+
+    font-family: var(--font-text);
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+
+    transition:
+        transform var(--transition-normal),
+        background var(--transition-normal),
+        box-shadow var(--transition-normal),
+        border-color var(--transition-normal),
+        color var(--transition-normal);
+}
+
+/*
+   Focus visible pour les personnes naviguant avec le clavier.
+*/
+.btn:focus-visible {
+    outline: 3px solid var(--or-doux);
+    outline-offset: 4px;
+}
+
+
+/* =========================================================
+   10. BOUTON OUI
+   ---------------------------------------------------------
+   JavaScript augmente le scale du bouton OUI. Le CSS garde
+   une transition fluide pour que cet agrandissement soit subtil.
+   ========================================================= */
+
+.btn-yes {
+    z-index: 5;
+
+    color: #ffffff;
+    background: var(--gradient-yes);
+
+    box-shadow:
+        0 8px 22px rgba(200, 93, 129, 0.44),
+        inset 0 1px 0 rgba(255, 255, 255, 0.30);
+}
+
+.btn-yes:hover {
+    background: var(--gradient-yes-hover);
+
+    box-shadow:
+        0 12px 28px rgba(200, 93, 129, 0.60),
+        inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+.btn-yes:active {
+    transform: scale(0.98);
+}
+
+
+/* =========================================================
+   11. BOUTON NON
+   ---------------------------------------------------------
+   Le bouton NON est discret et vitré. JavaScript change sa
+   position en fixed quand la personne tente de le sélectionner.
+   ========================================================= */
+
+.btn-no {
+    z-index: 20;
+
+    color: var(--texte-secondaire);
+    background: rgba(255, 255, 255, 0.10);
+
+    border: 1px solid rgba(255, 255, 255, 0.46);
+
+    box-shadow:
+        0 8px 18px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.16);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.btn-no:hover {
+    color: #ffffff;
+
+    border-color: var(--rose-clair);
+    background: rgba(217, 137, 164, 0.22);
+
+    box-shadow:
+        0 10px 22px rgba(217, 137, 164, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+
+/* =========================================================
+   12. ÉCRAN DE CONFIRMATION
+   ---------------------------------------------------------
+   Le message final est affiché après le clic sur OUI.
+   ========================================================= */
+
+.confirmation-screen {
+    overflow: hidden;
+}
+
+.confirmation-card {
+    z-index: 5;
+}
+
+.confirmation-title {
+    margin-bottom: 18px;
+
+    font-family: var(--font-title);
+    font-size: clamp(2.3rem, 6vw, 4rem);
+    font-weight: 600;
+    line-height: 1.1;
+
+    color: var(--rose-clair);
+
+    text-shadow: 0 3px 18px rgba(0, 0, 0, 0.40);
+}
+
+.confirmation-message {
+    max-width: 500px;
+
+    margin-bottom: 20px;
+
+    color: var(--texte-secondaire);
+
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    font-weight: 400;
+    line-height: 1.75;
+
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+
+/* =========================================================
+   13. BOUTON GOOGLE FORMS
+   ---------------------------------------------------------
+   Il est doré afin de se différencier du bouton OUI tout en
+   conservant le style chaleureux de l'invitation.
+   ========================================================= */
+
+.btn-confirm {
+    z-index: 6;
+
+    margin-top: 16px;
+
+    color: #ffffff;
+    background: var(--gradient-confirm);
+
+    box-shadow:
+        0 9px 24px rgba(201, 121, 89, 0.40),
+        inset 0 1px 0 rgba(255, 255, 255, 0.30);
+}
+
+.btn-confirm:hover {
+    background: var(--gradient-confirm-hover);
+
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 13px 30px rgba(201, 121, 89, 0.56),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.btn-confirm:active {
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   14. ANIMATIONS D'APPARITION
+   ---------------------------------------------------------
+   Le titre et le texte final apparaissent progressivement.
+   ========================================================= */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    opacity: 0;
+    animation: fadeInUp 700ms ease forwards;
+}
+
+.fade-in-delay {
+    opacity: 0;
+    animation: fadeInUp 700ms ease 180ms forwards;
+}
+
+
+/* =========================================================
+   15. CŒURS QUI TOMBENT
+   ---------------------------------------------------------
+   Les cœurs sont générés par script.js dans heartsContainer.
+   Ils sont décoratifs et ne peuvent pas empêcher de cliquer
+   sur le bouton Google Forms grâce à pointer-events: none.
+   ========================================================= */
+
+.hearts-container {
+    position: absolute;
+    inset: 0;
+
+    z-index: 2;
+
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.heart {
+    position: absolute;
+    top: -12vh;
+
+    color: var(--rose-principal);
+
+    font-size: 1.5rem;
+    line-height: 1;
+
+    opacity: 0;
+    pointer-events: none;
+
+    /*
+       Optimise l'animation sur les navigateurs modernes,
+       particulièrement utile sur smartphone.
+    */
+    will-change: transform, opacity;
+
+    text-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.28),
+        0 0 14px rgba(244, 189, 208, 0.50);
+
+    animation-name: heartFall;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}
+
+/*
+   Les cœurs apparaissent, descendent, tournent légèrement,
+   puis disparaissent vers le bas de l'écran.
+*/
+@keyframes heartFall {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, -12vh, 0) rotate(0deg) scale(0.75);
+    }
+
+    10% {
+        opacity: 0.95;
+    }
+
+    50% {
+        opacity: 0.85;
+        transform: translate3d(18px, 50vh, 0) rotate(150deg) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate3d(-14px, 112vh, 0) rotate(330deg) scale(0.88);
+    }
+}
+
+
+/* =========================================================
+   16. VARIATIONS DE COULEURS DES CŒURS
+   ---------------------------------------------------------
+   script.js attribue aléatoirement data-color="1" à "5".
+   ========================================================= */
+
+.heart[data-color="1"] {
+    color: var(--rose-principal);
+}
+
+.heart[data-color="2"] {
+    color: var(--corail);
+}
+
+.heart[data-color="3"] {
+    color: var(--violet-doux);
+}
+
+.heart[data-color="4"] {
+    color: var(--or-doux);
+}
+
+.heart[data-color="5"] {
+    color: var(--rose-clair);
+}
+
+
+/* =========================================================
+   17. RESPONSIVE TABLETTE
+   ========================================================= */
+
+@media (max-width: 900px) {
+    .invitation-card {
+        width: min(100%, 600px);
+        padding: 48px 36px;
+    }
+}
+
+
+/* =========================================================
+   18. RESPONSIVE MOBILE
+   ---------------------------------------------------------
+   Sur mobile, le fond fixed peut être moins fluide selon
+   les navigateurs. Il passe donc à scroll, tout en restant
+   en cover et en gardant l'image sur tout l'écran.
+   ========================================================= */
+
+@media (max-width: 640px) {
+    body {
+        background-attachment: scroll;
+        background-position: center center;
+        background-size: cover;
+    }
+
+    .screen {
+        padding: 16px;
+    }
+
+    .invitation-card {
+        width: 100%;
+        padding: 38px 22px;
+        border-radius: 20px;
+    }
+
+    .question-text {
+        margin-bottom: 32px;
+        font-size: clamp(1.65rem, 8vw, 2.2rem);
+        line-height: 1.38;
+    }
+
+    /*
+       Boutons l'un sous l'autre au départ.
+       Le bouton NON quitte cette zone quand il fuit.
+    */
+    .buttons-container {
+        flex-direction: column;
+        gap: 14px;
+        min-height: 122px;
+    }
+
+    .btn {
+        min-width: 170px;
+        min-height: 54px;
+        padding: 15px 30px;
+        font-size: 0.95rem;
+    }
+
+    .confirmation-title {
+        font-size: clamp(2.2rem, 12vw, 3rem);
+    }
+
+    .confirmation-message {
+        font-size: 1rem;
+        line-height: 1.65;
+    }
+
+    .btn-confirm {
+        width: min(100%, 280px);
+    }
+
+    .heart {
+        text-shadow:
+            0 2px 8px rgba(0, 0, 0, 0.25),
+            0 0 10px rgba(244, 189, 208, 0.45);
+    }
+}
+
+
+/* =========================================================
+   19. ÉCRANS PEU ÉLEVÉS
+   ---------------------------------------------------------
+   Ajustements lorsque le téléphone est en mode paysage ou
+   qu'un écran possède peu de hauteur.
+   ========================================================= */
+
+@media (max-height: 620px) {
+    .invitation-card {
+        padding-top: 28px;
+        padding-bottom: 28px;
+    }
+
+    .question-text {
+        margin-bottom: 22px;
+    }
+
+    .confirmation-title {
+        margin-bottom: 10px;
+    }
+
+    .confirmation-message {
+        line-height: 1.5;
+    }
+}
+
+
+/* =========================================================
+   20. ACCESSIBILITÉ : RÉDUCTION DES ANIMATIONS
+   ---------------------------------------------------------
+   Si l'utilisateur active "Réduire les animations" dans son
+   téléphone ou son ordinateur, les animations deviennent
+   instantanées et les cœurs ne sont pas affichés.
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+
+    .heart {
+        display: none;
+    }
+}

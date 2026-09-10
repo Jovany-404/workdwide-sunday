@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <!--
+        =========================================================
+        CONFIGURATION DU DOCUMENT HTML
+        ---------------------------------------------------------
+        Le head contient les métadonnées nécessaires au navigateur :
+        - encodage UTF-8 ;
+        - responsive mobile ;
+        - titre de l'onglet ;
+        - import du fichier CSS ;
+        - import des polices Google Fonts.
+        =========================================================
+    -->
+
+    <!-- Permet d'afficher correctement les accents et caractères français. -->
+    <meta charset="UTF-8">
+
+    <!-- Rend la page responsive sur smartphone, tablette et ordinateur. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Texte affiché dans l'onglet du navigateur. -->
+    <title>Invitation spéciale</title>
+
+    <!-- Description utile pour le partage et certains moteurs de recherche. -->
+    <meta
+        name="description"
+        content="Une invitation spéciale au Dimanche International."
+    >
+
+    <!-- Charge le fichier CSS qui gère le design et les animations. -->
+    <link rel="stylesheet" href="style.css">
+
+    <!--
+        Préconnexion aux serveurs de Google Fonts.
+        Cela peut accélérer légèrement le chargement des polices.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!--
+        Polices utilisées :
+        - Playfair Display : titre élégant et romantique ;
+        - Poppins : texte moderne et lisible.
+    -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,600&family=Poppins:wght@300;400;500;600&display=swap"
+        rel="stylesheet"
+    >
+</head>
+
+<body>
+    <!--
+        =========================================================
+        CONTENEUR PRINCIPAL
+        ---------------------------------------------------------
+        Ce conteneur englobe toute l'expérience d'invitation.
+        Il sert également de zone de référence pour les écrans
+        et pour le bouton NON lorsqu'il se déplace.
+        =========================================================
+    -->
+    <main class="invitation-container">
+
+        <!--
+            =========================================================
+            ÉCRAN D'ACCUEIL
+            ---------------------------------------------------------
+            C'est l'écran visible au chargement de la page.
+            Il contient la question et les boutons OUI / NON.
+            La classe "active" indique que cet écran est visible.
+            =========================================================
+        -->
+        <section
+            class="screen home-screen active"
+            id="homeScreen"
+            aria-label="Question d'invitation"
+        >
+            <!--
+                Carte centrale semi-transparente.
+                Elle utilise un effet glassmorphism : fond translucide,
+                flou d'arrière-plan et bordure discrète.
+            -->
+            <div class="invitation-card">
+                <!--
+                    Question principale.
+                    Le span "highlight" permet de styliser la deuxième
+                    partie de la question avec une couleur romantique.
+                -->
+                <h1 class="question-text">
+                    Veux-tu venir avec moi<br>
+                    <span class="highlight">au Dimanche International ?</span>
+                </h1>
+
+                <!--
+                    Zone qui place initialement les deux boutons.
+                    Le bouton NON sortira du flux normal lorsqu'il fuira,
+                    grâce à position: fixed appliqué par JavaScript.
+                -->
+                <div class="buttons-container">
+                    <!--
+                        Bouton de réponse positive.
+                        Il déclenche la transition vers l'écran final.
+                        Il grandit progressivement lorsqu'on tente NON.
+                    -->
+                    <button
+                        type="button"
+                        class="btn btn-yes"
+                        id="yesBtn"
+                        aria-label="Oui, je veux venir"
+                    >
+                        OUI
+                    </button>
+
+                    <!--
+                        Bouton de réponse négative.
+                        Il fuit au survol sur ordinateur et à la tentative
+                        de toucher sur smartphone.
+                    -->
+                    <button
+                        type="button"
+                        class="btn btn-no"
+                        id="noBtn"
+                        aria-label="Non, je ne veux pas venir"
+                    >
+                        NON
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!--
+            =========================================================
+            ÉCRAN DE CONFIRMATION
+            ---------------------------------------------------------
+            Cet écran est caché au départ. Il apparaît après le clic
+            sur le bouton OUI. Il contient le message final, le bouton
+            Google Forms et les cœurs générés en JavaScript.
+            =========================================================
+        -->
+        <section
+            class="screen confirmation-screen"
+            id="confirmationScreen"
+            aria-label="Confirmation de présence"
+        >
+            <!-- Carte du message de confirmation. -->
+            <div class="invitation-card confirmation-card">
+                <!-- Titre affiché avec une animation d'apparition. -->
+                <h1 class="confirmation-title fade-in">Bienvenue !</h1>
+
+                <!-- Message affiché progressivement après le titre. -->
+                <p class="confirmation-message fade-in-delay">
+                    Tu as donné ta parole pour être là.<br>
+                    Alors maintenant, je compte sur toi !
+                </p>
+
+                <!--
+                    Bouton vers Google Forms.
+                    Le lien href sera configuré automatiquement
+                    dans script.js avec GOOGLE_FORM_URL.
+                -->
+                <a
+                    href="#"
+                    class="btn btn-confirm"
+                    id="confirmBtn"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Confirmer ma présence sur Google Forms"
+                >
+                    Confirmer ma présence
+                </a>
+            </div>
+
+            <!--
+                Conteneur des cœurs.
+                JavaScript ajoute les éléments .heart ici après le clic OUI.
+                aria-hidden="true" indique que c'est décoratif.
+            -->
+            <div
+                class="hearts-container"
+                id="heartsContainer"
+                aria-hidden="true"
+            ></div>
+        </section>
+    </main>
+
+    <!-- Charge le fichier JavaScript après le contenu HTML. -->
+    <script src="script.js"></script>
+</body>
+</html>
